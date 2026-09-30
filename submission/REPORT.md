@@ -8,7 +8,7 @@
 - **MSSV:** 2A202602793
 - **Lớp:** K4-L3B
 - **Repository URL:** https://github.com/kevindao94work/K4-L3B-Day13-Dao_Gia_Bao-2A202602793-Monitoring-LLMOps
-- **Commit SHA cuối:** `4259296cab2a5efebfa65bad424aa4bfc29cb613`
+- **Commit SHA cuối:** `555f430` (commit chứa source và evidence; report cập nhật ngay sau đó)
 - **Challenge ID:** `day13-k4-l3b-monitoring-llmops-v1` (K4, do Lab Coach cấp).
 - **Tên project Langfuse cá nhân:** `day13-k4-l3b-2A202602793` (đã xác minh qua API).
 
