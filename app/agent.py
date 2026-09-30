@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import time
+from contextlib import nullcontext
 from dataclasses import dataclass
 
 from . import metrics
@@ -51,7 +52,20 @@ class LabAgent:
             },
         ):
             started = time.perf_counter()
-            docs = retrieve(message)
+            retrieval_context = (
+                langfuse_client.start_as_current_observation(
+                    name="retrieval",
+                    as_type="retriever",
+                    metadata={"query_preview": summarize_text(message)},
+                )
+                if hasattr(langfuse_client, "start_as_current_observation")
+                else nullcontext()
+            )
+            with retrieval_context:
+                docs = retrieve(message)
+                langfuse_client.update_current_span(
+                    metadata={"tool_name": "retrieval", "tool_success": True, "doc_count": len(docs)}
+                )
             prompt = resolve_prompt(
                 langfuse_client,
                 feature=feature,
@@ -71,13 +85,50 @@ class LabAgent:
                 },
                 version=prompt.version,
             )
-            # TODO (CP2): instrument retrieve() and FakeLLM.generate() as child
-            # observations. The nested generation must receive prompt, usage and cost.
             with propagate_attributes(prompt=prompt.managed_prompt):
-                response = self.llm.generate(prompt.text)
+                generation_context = (
+                    langfuse_client.start_as_current_observation(
+                        name="generation",
+                        as_type="generation",
+                        model=self.model,
+                        prompt=prompt.managed_prompt,
+                        metadata={
+                            "prompt_name": prompt.name,
+                            "prompt_label": prompt.label,
+                            "prompt_version": prompt.version,
+                            "prompt_source": prompt.source,
+                            "correlation_id": correlation_id,
+                        },
+                    )
+                    if hasattr(langfuse_client, "start_as_current_observation")
+                    else nullcontext()
+                )
+                with generation_context:
+                    response = self.llm.generate(prompt.text)
+                    generation_cost = self._estimate_cost(
+                        response.usage.input_tokens, response.usage.output_tokens
+                    )
+                    if hasattr(langfuse_client, "update_current_generation"):
+                        langfuse_client.update_current_generation(
+                            name="generation",
+                            model=response.model,
+                            usage_details={
+                                "input_tokens": response.usage.input_tokens,
+                                "output_tokens": response.usage.output_tokens,
+                            },
+                            cost_details={"total_cost": generation_cost},
+                            prompt=prompt.managed_prompt,
+                            metadata={
+                                "prompt_name": prompt.name,
+                                "prompt_label": prompt.label,
+                                "prompt_version": prompt.version,
+                                "prompt_source": prompt.source,
+                                "correlation_id": correlation_id,
+                            },
+                        )
             quality_score = self._heuristic_quality(message, response.text, docs)
             latency_ms = int((time.perf_counter() - started) * 1000)
-            cost_usd = self._estimate_cost(response.usage.input_tokens, response.usage.output_tokens)
+            cost_usd = generation_cost
 
         metrics.record_request(
             latency_ms=latency_ms,

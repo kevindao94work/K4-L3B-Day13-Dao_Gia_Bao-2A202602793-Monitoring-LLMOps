@@ -1,34 +1,24 @@
 # Evidence cá nhân
 
-Đặt ảnh hoặc output text dùng để chấm vào thư mục này. Danh sách đầy đủ xem tại [docs/SUBMISSION.md](../../docs/SUBMISSION.md).
+Ảnh và output để chấm nằm trong thư mục này. Bảng evidence đầy đủ và phần giải thích nằm trong [REPORT.md](../REPORT.md).
 
-Tên file gợi ý:
+| Evidence | File |
+|---|---|
+| Pytest cuối | `01-pytest.png` |
+| Log validator | `02-log-validator.png` |
+| Dashboard validator | `03-dashboard-validator.png` |
+| Structured log | `04-structured-log.png` |
+| PII redaction | `05-pii-redaction.png` |
+| Trace list | `06-trace-list.png` |
+| Trace waterfall | `07-trace-waterfall.png` |
+| Trace metadata và token usage | `08-trace-metadata-01.png` |
+| Cost chart | `08-trace-metadata-02.png` |
+| Prompt versions | `09-prompt-versions.png` |
+| Prompt promote | `10a-prompt-promote.png` |
+| Prompt rollback | `10b-prompt-rollback.png` |
+| Dashboard overview | `11-dashboard-overview.png` |
+| Incident metric | `12-incident-metric.png` |
+| Incident log | `13-incident-log.png` |
+| Incident trace | `14-incident-trace.png` |
 
-```text
-01-pytest.png
-02-log-validator.png
-03-dashboard-validator.png
-04-structured-log.png
-05-pii-redaction.png
-06-trace-list.png
-07-trace-waterfall.png
-08-trace-metadata.png
-09-prompt-versions.png
-10-prompt-rollback.png
-11-dashboard-overview.png
-12-incident-metric.png
-13-incident-log.png
-14-incident-trace.png
-```
-
-Có thể dùng `.txt` cho output của tests/validators. Có thể tách dashboard thành nhiều ảnh nếu một ảnh không đọc rõ.
-
-Ảnh `04`, `05`, `13` lấy từ terminal hoặc `data/logs.jsonl`. Ảnh `06`–`10`, `14` lấy từ project Langfuse cá nhân `day13-k4-l3b-<MSSV>` và nên nhìn thấy tên project. Không mở/chụp trang API Keys.
-
-Từ `submission/REPORT.md`, dẫn ảnh bằng đường dẫn tương đối:
-
-```markdown
-![Trace waterfall](evidence/07-trace-waterfall.png)
-```
-
-Không commit secret, API key, PII thô hoặc evidence của học viên/lớp khác.
+Ảnh Langfuse lấy từ project cá nhân `day13-k4-l3b-2A202602793`. Các log hiển thị dùng dữ liệu thử nghiệm của bài lab.

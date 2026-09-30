@@ -22,39 +22,30 @@ Ví dụ dưới đây minh họa mức độ cụ thể cần có. Học viên 
 
 ## Alert 1
 
-- Tên:
-- Severity:
-- Duration:
-- Kênh thông báo: Slack
-- SLI/SLO liên quan:
-- Điều kiện và thời gian duy trì:
-- Ảnh hưởng tới người dùng:
-- Ba bước kiểm tra đầu tiên:
-- Mitigation tạm thời:
-- Owner:
+- Tên: `HighLatencyP95`
+- Severity: `warning`; duy trì 5 phút khi P95 latency vượt 3.000 ms. Kênh: Slack `#k4-l3b-alerts`.
+- Metrics: xác nhận P95/P99, TTFT và thời điểm bắt đầu vượt ngưỡng trên cửa sổ 60 phút.
+- Logs: lọc `response_sent` trong khoảng đó, sắp theo `latency_ms` giảm dần và chọn một `correlation_id` đại diện.
+- Traces: mở trace cùng `correlation_id`, so thời lượng retrieval và generation để tìm span kéo dài.
+- Mitigation: nếu trace xác nhận regression của prompt, chuyển `production` về version ổn định; nếu chưa rõ, giảm tải demo và tiếp tục theo dõi P95.
+- Owner: `student-2A202602793`.
 
 ## Alert 2
 
-- Tên:
-- Severity:
-- Duration:
-- Kênh thông báo: Slack
-- SLI/SLO liên quan:
-- Điều kiện và thời gian duy trì:
-- Ảnh hưởng tới người dùng:
-- Ba bước kiểm tra đầu tiên:
-- Mitigation tạm thời:
-- Owner:
+- Tên: `ElevatedErrorRate`
+- Severity: `critical`; error rate trên 2% liên tục 5 phút. Kênh: Slack `#k4-l3b-alerts`.
+- Metrics: xác nhận error rate và thời điểm tăng; đối chiếu traffic để biết số request bị ảnh hưởng.
+- Logs: lọc `request_failed` trong khoảng đó, nhóm theo `error_type` và lấy `correlation_id` đại diện.
+- Traces: mở trace cùng `correlation_id`, kiểm tra trạng thái và lỗi ở retrieval/generation.
+- Mitigation: khôi phục thành phần/config vừa đổi nếu trace hỗ trợ kết luận đó; tắt practice incident nếu đang bật, rồi theo dõi error rate.
+- Owner: `student-2A202602793`.
 
 ## Alert 3
 
-- Tên:
-- Severity:
-- Duration:
-- Kênh thông báo: Slack
-- SLI/SLO liên quan:
-- Điều kiện và thời gian duy trì:
-- Ảnh hưởng tới người dùng:
-- Ba bước kiểm tra đầu tiên:
-- Mitigation tạm thời:
-- Owner:
+- Tên: `RetrievalOrQualityDegradation`
+- Severity: `warning`; retrieval success dưới 90% hoặc quality proxy trung bình dưới 0,75 liên tục 10 phút. Kênh: Slack `#k4-l3b-alerts`.
+- Metrics: xác nhận retrieval success, quality proxy và khoảng thời gian giảm.
+- Logs: kiểm tra `tool_success`, `quality_score` và `correlation_id` của các request trong khoảng đó.
+- Traces: mở trace cùng `correlation_id`, kiểm tra retrieval result và metadata prompt/version.
+- Mitigation: khôi phục corpus hoặc prompt về trạng thái ổn định khi trace xác nhận liên quan; chạy lại workload mẫu để kiểm tra proxy phục hồi.
+- Owner: `student-2A202602793`.

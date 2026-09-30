@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 from contextlib import contextmanager
+from functools import lru_cache
 from typing import Any
 
 try:
@@ -37,6 +38,20 @@ def get_langfuse_client():
 
 
 def tracing_enabled() -> bool:
-    return LANGFUSE_SDK_AVAILABLE and bool(
-        os.getenv("LANGFUSE_PUBLIC_KEY") and os.getenv("LANGFUSE_SECRET_KEY")
-    )
+    public_key = os.getenv("LANGFUSE_PUBLIC_KEY", "")
+    secret_key = os.getenv("LANGFUSE_SECRET_KEY", "")
+    base_url = os.getenv("LANGFUSE_BASE_URL", "https://cloud.langfuse.com")
+    if not LANGFUSE_SDK_AVAILABLE or not public_key or not secret_key:
+        return False
+    return _credentials_are_valid(public_key, secret_key, base_url)
+
+
+@lru_cache(maxsize=4)
+def _credentials_are_valid(public_key: str, secret_key: str, base_url: str) -> bool:
+    """Verify credentials once per process/config so health never reports a false positive."""
+    if not public_key or not secret_key or not base_url:
+        return False
+    try:
+        return bool(get_langfuse_client().auth_check())
+    except Exception:
+        return False

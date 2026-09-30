@@ -18,10 +18,28 @@ class TracingAdapterTests(unittest.TestCase):
         self.assertTrue(callable(client.start_as_current_observation))
 
     def test_tracing_is_disabled_without_both_keys(self) -> None:
+        tracing._credentials_are_valid.cache_clear()
         with patch.dict(os.environ, {}, clear=True):
             self.assertFalse(tracing.tracing_enabled())
 
         with patch.dict(os.environ, {"LANGFUSE_PUBLIC_KEY": "pk-only"}, clear=True):
+            self.assertFalse(tracing.tracing_enabled())
+
+    def test_tracing_is_disabled_when_configured_credentials_fail_auth(self) -> None:
+        class UnauthorizedClient:
+            def auth_check(self) -> bool:
+                return False
+
+        tracing._credentials_are_valid.cache_clear()
+        with patch.dict(
+            os.environ,
+            {
+                "LANGFUSE_PUBLIC_KEY": "pk-lf-example",
+                "LANGFUSE_SECRET_KEY": "sk-lf-example",
+                "LANGFUSE_BASE_URL": "https://cloud.langfuse.com",
+            },
+            clear=True,
+        ), patch.object(tracing, "get_langfuse_client", return_value=UnauthorizedClient()):
             self.assertFalse(tracing.tracing_enabled())
 
 
